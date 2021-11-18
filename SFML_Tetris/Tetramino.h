@@ -4,7 +4,7 @@
 #include "ExjobUtility.h"
 #include "Resources.h"
 
-enum class TetraminoType
+enum class TetriminoType
 {
 	TBLOCK,
 	JBLOCK,
@@ -33,17 +33,17 @@ public:
 	bool isFilled = false;
 };
 
-class Tetramino
+class Tetrimino
 {
 public:
-	Tetramino();
-	~Tetramino();
-	Tetramino(Resources& resources, std::vector<std::vector<GridCell>>* grid);
+	Tetrimino();
+	~Tetrimino();
+	Tetrimino(Resources& resources, std::vector<std::vector<GridCell>>* grid);
 	sf::Vector2i origin;
 
 	void Draw(sf::RenderWindow* window, sf::Vector2i drawOffset);
 	bool Move(sf::Vector2i direction);
-	bool CheckValidPosition();
+	bool IsValidPosition();
 	void SetOnGrid();
 
 	void TryRotate(Globals::ROTATION_DIRECTION dir);
@@ -53,7 +53,7 @@ public:
 private:
 
 	static int instanceCount;
-	TetraminoType type = (TetraminoType)(rand() % 7);
+	TetriminoType type = (TetriminoType)(rand() % 7);
 	Block blocks[4];
 	std::vector<std::vector<GridCell>>* pGrid;
 

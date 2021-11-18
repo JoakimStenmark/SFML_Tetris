@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <list>
+#include <deque>
 #include <memory>
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Time.hpp>
@@ -13,6 +14,8 @@ class Game
 {
 public:
 	Game();
+	~Game();
+	void CleanUp();
 	static float GetDeltaTime() { return deltaTime.asSeconds(); };
 private:
 
@@ -30,11 +33,11 @@ private:
 	float moveRepeatTime = 0.1f;
 	float moveRepeatTimer = 0;
 
-	Tetramino* pCurrentPiece;
-	Tetramino* pHoldPiece;
+	Tetrimino* pCurrentPiece;
+	Tetrimino* pHoldPiece;
 
 	//using unique_ptr to try it out in a list. makes clearing the list simpler.
-	std::list<std::unique_ptr<Tetramino>> pieceQueue;
+	std::deque<std::unique_ptr<Tetrimino>> pieceQueue;
 	int pieceQueueInitSize = 4;
 
 	sf::Vector2i startPos { Globals::COLUMNS / 2, 1 };
@@ -48,8 +51,7 @@ private:
 	
 	void Reset();
 	
-	Tetramino* CreateNewPiece();
-	Tetramino* GetFromQueue();
+	Tetrimino* GetFromQueue();
 	void ClearRow(int row);
 	void CheckForRows();
 	void DropCurrentPiece();

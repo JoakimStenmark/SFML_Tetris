@@ -22,22 +22,19 @@ Game::Game()
             grid[i][j].block.originOffset = sf::Vector2i(i, j);
         }
     }
+
+    //new random seed
     srand(unsigned int(time(NULL)));
     GameLoop();
 }
 
-void Game::Reset()
+Game::~Game()
 {
-    //clear board
-    for (int i = 0; i < grid.size(); i++)
-    {
-        for (int j = 0; j < grid[i].size(); j++)
-        {
-            grid[i][j].isFilled = false;
-            grid[i][j].block.sprite.setTexture(resources.emptyBlockTexture);
-        }
-    }
+    CleanUp();
+}
 
+void Game::CleanUp()
+{
     if (pCurrentPiece)
     {
         delete pCurrentPiece;
@@ -54,30 +51,44 @@ void Game::Reset()
     {
         pieceQueue.clear();
     }
+}
+
+void Game::Reset()
+{
+    //clear board
+    for (int i = 0; i < grid.size(); i++)
+    {
+        for (int j = 0; j < grid[i].size(); j++)
+        {
+            grid[i][j].isFilled = false;
+            grid[i][j].block.sprite.setTexture(resources.emptyBlockTexture);
+        }
+    }
+
+    CleanUp();
 
     for (size_t i = 0; i < pieceQueueInitSize; i++)
     {
-        Tetramino* temp = new Tetramino(resources, &grid);
+        Tetrimino* temp = new Tetrimino(resources, &grid);
         temp->origin = nextPos;
         for (size_t i = 0; i < (rand() % 4); i++)
         {
             temp->RotateClockwise();
         }
-        pieceQueue.push_back(std::unique_ptr<Tetramino>(temp));
+        pieceQueue.push_back(std::unique_ptr<Tetrimino>(temp));
     }
 
-    pCurrentPiece = new Tetramino(resources, &grid);
-    pCurrentPiece->origin = startPos;
+    pCurrentPiece = GetFromQueue();
 }
 
-Tetramino* Game::GetFromQueue()
+Tetrimino* Game::GetFromQueue()
 {
     if (!pieceQueue.empty())
     {
-        Tetramino* temp = pieceQueue.front().release();
+        Tetrimino* temp = pieceQueue.front().release();
         temp->origin = startPos;
         pieceQueue.pop_front();
-        pieceQueue.push_back(std::unique_ptr<Tetramino>(new Tetramino(resources, &grid)));
+        pieceQueue.push_back(std::unique_ptr<Tetrimino>(new Tetrimino(resources, &grid)));
         pieceQueue.back().get()->origin = nextPos;
 
         return temp;
@@ -92,16 +103,14 @@ void Game::ClearRow(int row)
     {
         grid[i][row].isFilled = false;
         grid[i][row].block.sprite.setTexture(resources.emptyBlockTexture);
-
     }
-    //moveSound rows down
 
     for (int i = row - 1; i >= 0; i--)
     {
         for (int j = 0; j < Globals::COLUMNS; j++)
         {
-            grid[j][i + 1].isFilled = grid[j][i].isFilled;
-            grid[j][i + 1].block.sprite.setTexture(*grid[j][i].block.sprite.getTexture());
+            grid[j][(long long)i + 1].isFilled = grid[j][i].isFilled;
+            grid[j][(long long)i + 1].block.sprite.setTexture(*grid[j][i].block.sprite.getTexture());
 
         }
     }
@@ -154,7 +163,7 @@ void Game::DropCurrentPiece()
     CheckForRows();
     pCurrentPiece = GetFromQueue();
 
-    if (!pCurrentPiece->CheckValidPosition())
+    if (!pCurrentPiece->IsValidPosition())
     {
         Reset();
     }
@@ -172,7 +181,7 @@ void Game::HoldAction()
     }
     else 
     {
-        Tetramino* pTemp = pCurrentPiece;
+        Tetrimino* pTemp = pCurrentPiece;
         pCurrentPiece = pHoldPiece;
         pHoldPiece = pTemp;
 
@@ -195,7 +204,6 @@ void Game::GameLoop()
     
     while (window.isOpen())
     {
-        //TODO: Clean up when closing the program
         input.ReadInput(&window);
 
         Update();
@@ -216,22 +224,28 @@ void Game::Update()
     sf::Vector2i dir (input.GetAxisDirection());
     if (input.GetKeyDown(sf::Keyboard::Left))
     {
-        pCurrentPiece->Move(dir);
-        audioManager.Play(AudioManager::audioClips::move);
+        if (pCurrentPiece->Move(dir))
+        {
+            audioManager.Play(AudioManager::audioClips::move);
+        }
     }
 
     if (input.GetKeyDown(sf::Keyboard::Right))
     {
-        pCurrentPiece->Move(dir);
-        audioManager.Play(AudioManager::audioClips::move);
+        if (pCurrentPiece->Move(dir))
+        {
+            audioManager.Play(AudioManager::audioClips::move);
+        }
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
     {
         if (moveRepeatTimer > moveRepeatTime)
         {
-            pCurrentPiece->Move(dir);
-            audioManager.Play(AudioManager::audioClips::move);
+            if (pCurrentPiece->Move(dir))
+            {
+                audioManager.Play(AudioManager::audioClips::move);
+            }
             moveRepeatTimer = 0;
         }
         moveRepeatTimer += deltaTime.asSeconds();
@@ -258,7 +272,6 @@ void Game::Update()
         pCurrentPiece->HardDrop();
         graceTimer = graceTime + 1;
         audioManager.Play(AudioManager::audioClips::drop);
-
     }
 
     if (input.GetKeyDown(sf::Keyboard::Space))
@@ -298,6 +311,7 @@ void Game::Draw(sf::RenderWindow* window)
 
     int xOffset = 10;
     int yOffset = -2;
+
     for (int i = 0; i < grid.size(); i++)
     {
         for (int j = 0; j < grid[i].size(); j++)
@@ -319,7 +333,7 @@ void Game::Draw(sf::RenderWindow* window)
     if (!pieceQueue.empty())
     {   
         int i = 0;
-        for (std::list<std::unique_ptr<Tetramino>>::iterator it = pieceQueue.begin(); it != pieceQueue.end(); ++it)
+        for (std::deque<std::unique_ptr<Tetrimino>>::iterator it = pieceQueue.begin(); it != pieceQueue.end(); ++it)
         {         
             it->get()->Draw(window, sf::Vector2i(xOffset, i * 5));
             i++;

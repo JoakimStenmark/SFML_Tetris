@@ -1,6 +1,6 @@
 #include "Tetramino.h"
 
-int Tetramino::instanceCount = 0;
+int Tetrimino::instanceCount = 0;
 
 Block::Block()
 {
@@ -11,7 +11,6 @@ Block::Block(Resources& resources)
 {
 	sprite.setTexture(resources.blockTexture5);
 	sprite.setScale(sf::Vector2f(Globals::SPRITE_SCALE, Globals::SPRITE_SCALE));
-
 }
 
 void Block::Draw(sf::RenderWindow* window, const sf::Vector2i& origin)
@@ -27,56 +26,56 @@ void Block::Draw(sf::RenderWindow* window, const sf::Vector2i& origin)
 	}
 }
 
-Tetramino::~Tetramino()
+Tetrimino::~Tetrimino()
 {
 	instanceCount--;
 	printf("Tetramino Destroyed. Instances : %i \n ", instanceCount);
 }
 
-Tetramino::Tetramino(Resources& resources, std::vector<std::vector<GridCell>>* grid)
+Tetrimino::Tetrimino(Resources& resources, std::vector<std::vector<GridCell>>* grid)
 {
 	instanceCount++;
 	printf("Tetramino Created. Instances : %i \n ", instanceCount);
 
 	switch (type)
 	{
-		case TetraminoType::TBLOCK:
+		case TetriminoType::TBLOCK:
 			//T-Block
 			blocks[1].originOffset = { 0, 1 };
 			blocks[2].originOffset = { 1, 0 };
 			blocks[3].originOffset = { -1, 0 };
 			break;
-		case TetraminoType::JBLOCK:
+		case TetriminoType::JBLOCK:
 			//J-Block
 			blocks[1].originOffset = { 1, 0 };
 			blocks[2].originOffset = { -1, 0 };
 			blocks[3].originOffset = { 1, 1 };
 			break;
-		case TetraminoType::LBLOCK:
+		case TetriminoType::LBLOCK:
 			//L-Block
 			blocks[1].originOffset = { 1, 0 };
 			blocks[2].originOffset = { -1, 0 };
 			blocks[3].originOffset = { 1, -1 };
 			break;
-		case TetraminoType::ZBLOCK:
+		case TetriminoType::ZBLOCK:
 			//Z-Block
 			blocks[1].originOffset = { -1, 0 };
 			blocks[2].originOffset = { 0, 1 };
 			blocks[3].originOffset = { 1, 1 };
 			break;
-		case TetraminoType::SBLOCK:
+		case TetriminoType::SBLOCK:
 			//S-Block
 			blocks[1].originOffset = { 1, 0 };
 			blocks[2].originOffset = { 0, 1 };
 			blocks[3].originOffset = { -1, 1 };
 			break;
-		case TetraminoType::OBLOCK:
+		case TetriminoType::OBLOCK:
 			//O-Block
 			blocks[1].originOffset = { 1, 0 };
 			blocks[2].originOffset = { 0, 1 };
 			blocks[3].originOffset = { 1, 1 };
 			break;
-		case TetraminoType::LINEPIECE:
+		case TetriminoType::LINEPIECE:
 			//LINEPIECE
 			blocks[1].originOffset = { 0, -1 };
 			blocks[2].originOffset = { 0, 1 };
@@ -90,25 +89,25 @@ Tetramino::Tetramino(Resources& resources, std::vector<std::vector<GridCell>>* g
 	{
 		switch (type)
 		{
-		case TetraminoType::TBLOCK:
+		case TetriminoType::TBLOCK:
 			b.sprite.setTexture(resources.blockTexture1);
 			break;
-		case TetraminoType::JBLOCK:
+		case TetriminoType::JBLOCK:
 			b.sprite.setTexture(resources.blockTexture2);
 			break;
-		case TetraminoType::LBLOCK:
+		case TetriminoType::LBLOCK:
 			b.sprite.setTexture(resources.blockTexture3);
 			break;
-		case TetraminoType::ZBLOCK:
+		case TetriminoType::ZBLOCK:
 			b.sprite.setTexture(resources.blockTexture4);
 			break;
-		case TetraminoType::SBLOCK:
+		case TetriminoType::SBLOCK:
 			b.sprite.setTexture(resources.blockTexture5);
 			break;
-		case TetraminoType::OBLOCK:
+		case TetriminoType::OBLOCK:
 			b.sprite.setTexture(resources.blockTexture6);
 			break;
-		case TetraminoType::LINEPIECE:
+		case TetriminoType::LINEPIECE:
 			b.sprite.setTexture(resources.blockTexture7);
 			break;
 		default:
@@ -120,7 +119,7 @@ Tetramino::Tetramino(Resources& resources, std::vector<std::vector<GridCell>>* g
 
 }
 
-void Tetramino::Draw(sf::RenderWindow* window, sf::Vector2i drawOffset)
+void Tetrimino::Draw(sf::RenderWindow* window, sf::Vector2i drawOffset)
 {
 	for (Block& b : blocks)
 	{
@@ -128,10 +127,10 @@ void Tetramino::Draw(sf::RenderWindow* window, sf::Vector2i drawOffset)
 	}
 }
 
-bool Tetramino::Move(sf::Vector2i direction)
+bool Tetrimino::Move(sf::Vector2i direction)
 {
 	origin += sf::Vector2i(direction.x, direction.y);
-	if (!CheckValidPosition())
+	if (!IsValidPosition())
 	{
 		origin -= sf::Vector2i(direction.x, direction.y);
 		return false;
@@ -139,7 +138,7 @@ bool Tetramino::Move(sf::Vector2i direction)
 	return true;
 }
 
-bool Tetramino::CheckValidPosition()
+bool Tetrimino::IsValidPosition()
 {
 	for (Block& block : blocks)
 	{
@@ -177,17 +176,17 @@ bool Tetramino::CheckValidPosition()
 	return true;
 }
 
-void Tetramino::SetOnGrid()
+void Tetrimino::SetOnGrid()
 {
 	for (Block& block : blocks)
 	{
-		GridCell& cell = (*pGrid)[(int)origin.x + (int)block.originOffset.x][(int)origin.y + (int)block.originOffset.y];
+		GridCell& cell = (*pGrid)[(long long)origin.x + block.originOffset.x][(long long)origin.y + block.originOffset.y];
 		cell.block.sprite.setTexture(*block.sprite.getTexture());
 		cell.isFilled = true;
 	}
 }
 
-void Tetramino::RotateClockwise()
+void Tetrimino::RotateClockwise()
 {
 	for (Block& block : blocks)
 	{
@@ -195,7 +194,7 @@ void Tetramino::RotateClockwise()
 	}
 }
 
-void Tetramino::RotateCounterClockwise()
+void Tetrimino::RotateCounterClockwise()
 {
 	for (Block& block : blocks)
 	{
@@ -204,9 +203,9 @@ void Tetramino::RotateCounterClockwise()
 
 }
 
-void Tetramino::TryRotate(Globals::ROTATION_DIRECTION dir)
+void Tetrimino::TryRotate(Globals::ROTATION_DIRECTION dir)
 {
-	if (type == TetraminoType::OBLOCK)
+	if (type == TetriminoType::OBLOCK)
 	{
 		return;
 	}
@@ -214,7 +213,7 @@ void Tetramino::TryRotate(Globals::ROTATION_DIRECTION dir)
 	if (dir == Globals::CLOCKWISE)
 	{
 		RotateClockwise();
-		if (CheckValidPosition())
+		if (IsValidPosition())
 		{
 			return;
 		}
@@ -240,7 +239,7 @@ void Tetramino::TryRotate(Globals::ROTATION_DIRECTION dir)
 	{
 		RotateCounterClockwise();
 
-		if (CheckValidPosition())
+		if (IsValidPosition())
 		{
 			return;
 		}
@@ -264,17 +263,15 @@ void Tetramino::TryRotate(Globals::ROTATION_DIRECTION dir)
 	}
 }
 
-void Tetramino::HardDrop()
+void Tetrimino::HardDrop()
 {
 	for (size_t i = 0; i < Globals::ROWS; i++)
 	{
-		
 		if (!Move(sf::Vector2i(0, 1)))
 		{
 			break;
 		}
 	}
-	
 }
 
 
