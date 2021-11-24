@@ -17,6 +17,5 @@ public:
 	sf::Texture blockTexture7;
 	sf::Texture emptyBlockTexture;
 
-	sf::SoundBuffer sb;
-
+	sf::Font font;
 };

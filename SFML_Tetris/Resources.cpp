@@ -11,5 +11,5 @@ Resources::Resources()
     blockTexture7.loadFromFile("Images/Blocks_01_64x64_Alt_00_007.png");
     emptyBlockTexture.loadFromFile("Images/Blocks_01_64x64_Alt_00_008.png");
 
-    sb.loadFromFile("Audio/EnemyHit.wav");
+    font.loadFromFile("Images/AGENCYB.ttf");
 }

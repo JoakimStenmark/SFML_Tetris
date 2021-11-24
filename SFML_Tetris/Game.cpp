@@ -21,6 +21,10 @@ Game::Game()
     queueSpace.setOutlineThickness(10);
     queueSpace.setOutlineColor(sf::Color::White);
 
+    pausedText.setFont(resources.font);
+    pausedText.setPosition(0, Globals::SCREEN_HEIGHT / 2);
+    pausedText.setCharacterSize(24);
+    pausedText.setString("Paused! Press p to resume.");
 
     //Grid Setup
     grid.resize(Globals::COLUMNS);
@@ -87,7 +91,7 @@ void Game::Reset()
 
     CleanUp();
 
-    stats = new TetrisStats; 
+    stats = new TetrisConfig; 
 
 
     for (size_t i = 0; i < pieceQueueInitSize; i++)
@@ -256,6 +260,16 @@ void Game::Update()
         return;
     }
 
+    if (input.GetKeyDown(sf::Keyboard::P))
+    {
+        isPaused = !isPaused;
+    }
+
+    if (isPaused)
+    {
+        return;
+    }
+
     //input bindings
     sf::Vector2i dir (input.GetAxisDirection());
     if (input.GetKeyDown(sf::Keyboard::Left))
@@ -349,36 +363,45 @@ void Game::Draw(sf::RenderWindow* window)
     window->draw(holdSpace);
     window->draw(queueSpace);
 
-    int xOffset = 0;
-    int yOffset = 0;
-
-    for (int i = 0; i < grid.size(); i++)
+    if (!isPaused)
     {
-        for (int j = 0; j < grid[i].size(); j++)
+        int xOffset = 0;
+        int yOffset = 0;
+
+        for (int i = 0; i < grid.size(); i++)
         {
-            grid[i][j].block.Draw(window, sf::Vector2i(xOffset, yOffset));
+            for (int j = 0; j < grid[i].size(); j++)
+            {
+                grid[i][j].block.Draw(window, sf::Vector2i(xOffset, yOffset));
+            }
         }
-    }
 
-    if (pCurrentPiece)
-    {
-        pCurrentPiece->Draw(window);
-    }
-
-    if (pHoldPiece)
-    {
-        pHoldPiece->Draw(window);
-    }
-
-    if (!pieceQueue.empty())
-    {   
-        int i = 0;
-        for (std::deque<std::unique_ptr<Tetrimino>>::iterator it = pieceQueue.begin(); it != pieceQueue.end(); ++it)
-        {         
-            it->get()->Draw(window, sf::Vector2i(xOffset, i * 5));
-            i++;
+        if (pCurrentPiece)
+        {
+            pCurrentPiece->Draw(window);
         }
+
+        if (pHoldPiece)
+        {
+            pHoldPiece->Draw(window);
+        }
+
+        if (!pieceQueue.empty())
+        {   
+            int i = 0;
+            for (std::deque<std::unique_ptr<Tetrimino>>::iterator it = pieceQueue.begin(); it != pieceQueue.end(); ++it)
+            {         
+                it->get()->Draw(window, sf::Vector2i(xOffset, i * 5));
+                i++;
+            }
+        }
+
     }
+    else
+    {
+        window->draw(pausedText);
+    }
+
     window->display();
 }
 

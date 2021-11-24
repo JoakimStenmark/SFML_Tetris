@@ -65,7 +65,8 @@ private:
 	//Holds blocks when tetraminos settle. Doesn't reference created blocks, only gets their texture.
 	std::vector<std::vector<GridCell>> grid;
 	
-
+	bool isPaused = false;
+	sf::Text pausedText;
 
 	std::unique_ptr<Tetrimino> SpawnTetrimino();
 	

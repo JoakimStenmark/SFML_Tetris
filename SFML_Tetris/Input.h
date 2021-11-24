@@ -34,6 +34,7 @@ private:
 	InputFrame up = { sf::Keyboard::Up };
 	InputFrame space = { sf::Keyboard::Space };
 	InputFrame rShift = { sf::Keyboard::RShift };
+	InputFrame p = { sf::Keyboard::P };
 
 };
 

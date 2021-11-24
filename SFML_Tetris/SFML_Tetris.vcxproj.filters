@@ -21,19 +21,10 @@
     <ClCompile Include="ExjobUtility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SFML_Player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Input.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Ball.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Tetramino.cpp">
@@ -50,19 +41,10 @@
     <ClInclude Include="ExjobUtility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SFML_Player.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Ball.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Globals.h">

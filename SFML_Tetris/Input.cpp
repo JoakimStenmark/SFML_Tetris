@@ -41,6 +41,7 @@ void Input::ReadInput(sf::RenderWindow* window)
     up.frameKey = false;
     space.frameKey = false;
     rShift.frameKey = false;
+    p.frameKey = false;
 
     while (window->pollEvent(event))
     {
@@ -66,6 +67,8 @@ void Input::ReadInput(sf::RenderWindow* window)
             ReadKeyPressed(event.key.code, up);
             ReadKeyPressed(event.key.code, space);
             ReadKeyPressed(event.key.code, rShift);
+            ReadKeyPressed(event.key.code, p);
+
 
         }
 
@@ -77,6 +80,7 @@ void Input::ReadInput(sf::RenderWindow* window)
             ReadKeyReleased(event.key.code, up);
             ReadKeyReleased(event.key.code, space);
             ReadKeyReleased(event.key.code, rShift);
+            ReadKeyReleased(event.key.code, p);
 
         }
     }
@@ -103,6 +107,9 @@ bool Input::GetKeyDown(sf::Keyboard::Key key)
         break;
     case sf::Keyboard::RShift:
         return rShift.frameKey;
+        break;
+    case sf::Keyboard::P:
+        return p.frameKey;
         break;
     default: printf("Input not Bound");
         break;

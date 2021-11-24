@@ -1,7 +1,5 @@
 #include "AudioManager.h"
 
-
-
 AudioManager::AudioManager()
 {
 	dropSound.loadFromFile("Audio/Tetris_Drop.wav");
@@ -24,6 +22,7 @@ void AudioManager::Play(AudioManager::audioClips clip)
 	{
 		if (audioSource)
 		{
+
 			audioSource->setBuffer(*s);
 			audioSource->play();
 		}
