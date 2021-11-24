@@ -10,27 +10,40 @@
 #include "Globals.h"
 #include "AudioManager.h"
 
+
+struct TetrisConfig
+{
+	unsigned long long int currentScore = 0;
+	const int thresholdToSpeedUp = 4;
+	int rowsCleared = 0;
+
+	float graceTime = 0.3f;
+	float moveRepeatTime = 0.1f;
+	float dropTime = 1.f;
+	float dropTimeReduction = 0.80f;
+
+};
+
 class Game
 {
 public:
 	Game();
 	~Game();
-	void CleanUp();
 	static float GetDeltaTime() { return deltaTime.asSeconds(); };
 private:
+
+	void CleanUp();
+	void Reset();
 
 	Resources resources;
 	Input input;
 	AudioManager audioManager;
-	
 	static sf::Time deltaTime;
-	float dropTime = 0.2f;
+
+	TetrisConfig* stats;
+
 	float dropCounter = 0;
-
-	float graceTime = 0.3f;
 	float graceTimer = 0;
-
-	float moveRepeatTime = 0.1f;
 	float moveRepeatTimer = 0;
 
 	Tetrimino* pCurrentPiece;
@@ -40,16 +53,21 @@ private:
 	std::deque<std::unique_ptr<Tetrimino>> pieceQueue;
 	int pieceQueueInitSize = 4;
 
-	sf::Vector2i startPos { Globals::COLUMNS / 2, 1 };
-	sf::Vector2i holdPos { -3, 3 };
-	sf::Vector2i nextPos { Globals::COLUMNS + 3, 3 };
+	sf::RectangleShape holdSpace;
+	sf::RectangleShape queueSpace;
+
+	sf::Vector2i startPos { Globals::COLUMNS / 2, 3 };
+	sf::Vector2i holdPos { -4, 6 };
+	sf::Vector2i nextPos { Globals::COLUMNS + 4, 6 };
 
 	bool canHoldPiece = false;
 
 	//Holds blocks when tetraminos settle. Doesn't reference created blocks, only gets their texture.
 	std::vector<std::vector<GridCell>> grid;
 	
-	void Reset();
+
+
+	std::unique_ptr<Tetrimino> SpawnTetrimino();
 	
 	Tetrimino* GetFromQueue();
 	void ClearRow(int row);

@@ -7,8 +7,22 @@ sf::Time Game::deltaTime = sf::Time();
 
 Game::Game()
 {
-    //Grid Setup
+    holdSpace.setSize(sf::Vector2f(32 * 4, 32 * 4));
+    holdSpace.setPosition(sf::Vector2f(holdPos * 32));
+    holdSpace.setOrigin(32, 32 );
+    holdSpace.setFillColor(sf::Color::Transparent);
+    holdSpace.setOutlineThickness(10);
+    holdSpace.setOutlineColor(sf::Color::White);
 
+    queueSpace.setSize(sf::Vector2f(32 * 4, 32 * 24));
+    queueSpace.setPosition(sf::Vector2f(nextPos * 32));
+    queueSpace.setOrigin(64, 64);
+    queueSpace.setFillColor(sf::Color::Transparent);
+    queueSpace.setOutlineThickness(10);
+    queueSpace.setOutlineColor(sf::Color::White);
+
+
+    //Grid Setup
     grid.resize(Globals::COLUMNS);
 
     for (int i = 0; i < grid.size(); i++)
@@ -35,16 +49,22 @@ Game::~Game()
 
 void Game::CleanUp()
 {
+    if (stats)
+    {
+        delete stats;
+        stats = nullptr;
+    }
+
     if (pCurrentPiece)
     {
         delete pCurrentPiece;
-        pCurrentPiece = NULL;
+        pCurrentPiece = nullptr;
     }
 
     if (pHoldPiece)
     {
         delete pHoldPiece;
-        pHoldPiece = NULL;
+        pHoldPiece = nullptr;
     }
 
     if (!pieceQueue.empty())
@@ -67,18 +87,26 @@ void Game::Reset()
 
     CleanUp();
 
+    stats = new TetrisStats; 
+
+
     for (size_t i = 0; i < pieceQueueInitSize; i++)
     {
-        Tetrimino* temp = new Tetrimino(resources, &grid);
-        temp->origin = nextPos;
-        for (size_t i = 0; i < (rand() % 4); i++)
-        {
-            temp->RotateClockwise();
-        }
-        pieceQueue.push_back(std::unique_ptr<Tetrimino>(temp));
+        pieceQueue.push_back(SpawnTetrimino());
     }
 
     pCurrentPiece = GetFromQueue();
+}
+
+std::unique_ptr<Tetrimino> Game::SpawnTetrimino()
+{
+    Tetrimino* temp = new Tetrimino(resources, &grid);
+    temp->origin = nextPos;
+    for (size_t i = 0; i < (rand() % 4); i++)
+    {
+        temp->RotateClockwise();
+    }
+    return std::unique_ptr<Tetrimino>(temp);
 }
 
 Tetrimino* Game::GetFromQueue()
@@ -88,9 +116,7 @@ Tetrimino* Game::GetFromQueue()
         Tetrimino* temp = pieceQueue.front().release();
         temp->origin = startPos;
         pieceQueue.pop_front();
-        pieceQueue.push_back(std::unique_ptr<Tetrimino>(new Tetrimino(resources, &grid)));
-        pieceQueue.back().get()->origin = nextPos;
-
+        pieceQueue.push_back(SpawnTetrimino());
         return temp;
     }
 
@@ -135,6 +161,12 @@ void Game::CheckForRows()
         {
             ClearRow(i);
             rowCount++;
+            stats->rowsCleared++;
+
+            if (stats->rowsCleared % stats->thresholdToSpeedUp == 0)
+            {
+                stats->dropTime *= 0.75f;
+            }
         }
 
     }
@@ -148,6 +180,8 @@ void Game::CheckForRows()
         audioManager.Play(AudioManager::audioClips::clear);
 
     }
+
+
 }
 
 void Game::DropCurrentPiece()
@@ -194,11 +228,13 @@ void Game::HoldAction()
 
 void Game::GameLoop()
 {
-    sf::RenderWindow window(sf::VideoMode(Globals::SCREEN_WIDTH, Globals::SCREEN_HEIGHT), "Tetris");
-    sf::View view(sf::Vector2f(Globals::SCREEN_WIDTH / 2.f, Globals::SCREEN_HEIGHT / 2.f), sf::Vector2f(Globals::SCREEN_WIDTH, Globals::SCREEN_HEIGHT));
+    sf::RenderWindow window(sf::VideoMode(Globals::SCREEN_WIDTH, Globals::SCREEN_HEIGHT), "Tetris");    
+    int xOffset = (-12) * 32;
+    int yOffset = 3 * 32;
+
+    sf::View view(sf::Vector2f(Globals::SCREEN_WIDTH / 2.f + xOffset, Globals::SCREEN_HEIGHT / 2.f + yOffset), sf::Vector2f(Globals::SCREEN_WIDTH, Globals::SCREEN_HEIGHT));
     window.setView(view);
     sf::Clock deltaTimer;
-    sf::Clock frameTimer;
 
     Reset();
     
@@ -240,7 +276,7 @@ void Game::Update()
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
     {
-        if (moveRepeatTimer > moveRepeatTime)
+        if (moveRepeatTimer > stats->moveRepeatTime)
         {
             if (pCurrentPiece->Move(dir))
             {
@@ -270,8 +306,9 @@ void Game::Update()
     if (input.GetKeyDown(sf::Keyboard::Down))
     {
         pCurrentPiece->HardDrop();
-        graceTimer = graceTime + 1;
         audioManager.Play(AudioManager::audioClips::drop);
+        graceTimer = stats->graceTime + 1;
+        dropCounter = stats->dropTime + 1;
     }
 
     if (input.GetKeyDown(sf::Keyboard::Space))
@@ -285,11 +322,11 @@ void Game::Update()
     }
 
     //fall section
-    if (dropCounter > dropTime)
+    if (dropCounter > stats->dropTime)
     {
         if (!pCurrentPiece->Move(sf::Vector2i(0, 1)))
         {
-            if (graceTimer > graceTime)
+            if (graceTimer > stats->graceTime)
             {
                 DropCurrentPiece();
             }
@@ -309,8 +346,11 @@ void Game::Draw(sf::RenderWindow* window)
 {
     window->clear();
 
-    int xOffset = 10;
-    int yOffset = -2;
+    window->draw(holdSpace);
+    window->draw(queueSpace);
+
+    int xOffset = 0;
+    int yOffset = 0;
 
     for (int i = 0; i < grid.size(); i++)
     {
@@ -322,12 +362,12 @@ void Game::Draw(sf::RenderWindow* window)
 
     if (pCurrentPiece)
     {
-        pCurrentPiece->Draw(window, sf::Vector2i(xOffset, yOffset));
+        pCurrentPiece->Draw(window);
     }
 
     if (pHoldPiece)
     {
-        pHoldPiece->Draw(window, sf::Vector2i(xOffset, 0));
+        pHoldPiece->Draw(window);
     }
 
     if (!pieceQueue.empty())

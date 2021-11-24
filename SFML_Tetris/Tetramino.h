@@ -41,7 +41,7 @@ public:
 	Tetrimino(Resources& resources, std::vector<std::vector<GridCell>>* grid);
 	sf::Vector2i origin;
 
-	void Draw(sf::RenderWindow* window, sf::Vector2i drawOffset);
+	void Draw(sf::RenderWindow* window, sf::Vector2i drawOffset = sf::Vector2i(0, 0));
 	bool Move(sf::Vector2i direction);
 	bool IsValidPosition();
 	void SetOnGrid();
