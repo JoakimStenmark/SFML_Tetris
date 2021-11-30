@@ -58,8 +58,11 @@ sf::SoundBuffer* AudioManager::GetSoundBuffer(audioClips clip)
 	return nullptr;
 }
 
+
+
 sf::Sound* AudioManager::GetIdleAudioSource()
 {
+
 	for (std::vector<sf::Sound>::iterator i = audioSources.begin(); i < audioSources.end(); ++i)
 	{
 		if (i->getStatus() == sf::SoundSource::Status::Stopped)

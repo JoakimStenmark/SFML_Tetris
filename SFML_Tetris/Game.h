@@ -14,7 +14,7 @@
 struct TetrisConfig
 {
 	unsigned long long int currentScore = 0;
-	const int thresholdToSpeedUp = 4;
+	const int thresholdToSpeedUp = 8;
 	int rowsCleared = 0;
 
 	float graceTime = 0.3f;

@@ -3,6 +3,7 @@
 #include "Globals.h"
 #include "ExjobUtility.h"
 #include "Resources.h"
+//Avoid Circular dependency
 
 enum class TetriminoType
 {

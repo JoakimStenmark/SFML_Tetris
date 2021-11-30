@@ -53,6 +53,7 @@ Game::~Game()
 
 void Game::CleanUp()
 {
+    //Memory management
     if (stats)
     {
         delete stats;
